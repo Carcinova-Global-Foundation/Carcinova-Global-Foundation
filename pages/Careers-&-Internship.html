@@ -286,7 +286,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form action="https://formspree.io/f/your-form-id" method="POST" enctype="multipart/form-data">
+            <form id="careersForm">
               <div class="row gy-3">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -339,10 +339,8 @@
                 </div>
                 <div class="col-12">
                   <div class="form-group">
-                    <label for="applicantResume" class="form-label">Upload Resume/CV</label>
-                    <input type="file" class="form-control" id="applicantResume" name="resume" accept=".pdf,.doc,.docx"
-                      required>
-                    <div class="form-text">Accepted formats: PDF, DOC, DOCX (Max 5MB)</div>
+                    <label for="applicantResume" class="form-label">Upload Your Resume Drive Link</label>
+                    <input type="text" class="form-control" id="applicantResume" name="resume" required>
                   </div>
                 </div>
                 <div class="col-12 text-center">
@@ -436,6 +434,71 @@
 
   <!-- Main JS File -->
   <script src="../assets/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    // Initialize EmailJS
+    emailjs.init("FENJpUjw3ZLYziysD");
+
+    // Form submission handler
+    document.addEventListener('DOMContentLoaded', function () {
+      const careersForm = document.getElementById('careersForm');
+
+      if (careersForm) {
+        careersForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          sendcareersForm();
+        });
+      }
+    });
+
+    function sendcareersForm() {
+      const submitBtn = document.querySelector('#careersForm .btn-success');
+      const originalText = submitBtn.textContent;
+
+      // Replace these with your actual EmailJS IDs
+      const SERVICE_ID = "service_v0bxoge"; // Replace with your EmailJS Service ID
+      const TEMPLATE_ID = "template_f5zkyjv"; // Replace with your EmailJS Template ID
+
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+
+      // Combine all fields into one message
+      const fullMessage = `
+Name: ${document.getElementById("applicantName").value}
+Email: ${document.getElementById("applicantEmail").value}
+Mobile: ${document.getElementById("applicantPhone").value}
+City: ${document.getElementById("applicantLocation").value}
+Role: ${document.getElementById("applicantRole").value}
+Experience: ${document.getElementById("applicantExperience").value}
+Message: ${document.getElementById("applicantMessage").value}
+Docx: ${document.getElementById("applicantResume").value}
+    `.trim();
+
+      const sub = `${document.getElementById('applicantRole').value} Request Form`;
+
+      const templateParams = {
+        name: document.getElementById("applicantName").value,
+        email: document.getElementById("applicantEmail").value,
+        message: fullMessage,
+        subject: sub // Default subject
+      };
+
+      emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+        .then((response) => {
+          alert("✓ Thank you! Your application has been received.");
+          console.log('SUCCESS!', response.status, response.text);
+          document.getElementById('careersForm').reset();
+        })
+        .catch((error) => {
+          console.error('FAILED...', error);
+          alert("✗ Failed to submit. Please try again or contact us directly.");
+        })
+        .finally(() => {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        });
+    }
+  </script>
 
 </body>
 
